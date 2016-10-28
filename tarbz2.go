@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/dsnet/compress/bzip2"
+	"github.com/nmiyake/paxtar"
 )
 
 // TarBz2 creates a .tar.bz2 file at tarbz2Path containing
@@ -26,7 +27,7 @@ func TarBz2(tarbz2Path string, filePaths []string) error {
 	}
 	defer bz2Writer.Close()
 
-	tarWriter := tar.NewWriter(bz2Writer)
+	tarWriter := paxtar.NewWriter(bz2Writer)
 	defer tarWriter.Close()
 
 	return tarball(filePaths, tarWriter, tarbz2Path)

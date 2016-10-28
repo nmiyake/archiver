@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/nmiyake/paxtar"
 )
 
 // Tar creates a .tar file at tarPath containing the
@@ -22,7 +24,7 @@ func Tar(tarPath string, filePaths []string) error {
 	}
 	defer out.Close()
 
-	tarWriter := tar.NewWriter(out)
+	tarWriter := paxtar.NewWriter(out)
 	defer tarWriter.Close()
 
 	return tarball(filePaths, tarWriter, tarPath)
@@ -41,7 +43,7 @@ func TarGz(targzPath string, filePaths []string) error {
 	gzWriter := gzip.NewWriter(out)
 	defer gzWriter.Close()
 
-	tarWriter := tar.NewWriter(gzWriter)
+	tarWriter := paxtar.NewWriter(gzWriter)
 	defer tarWriter.Close()
 
 	return tarball(filePaths, tarWriter, targzPath)
@@ -49,7 +51,7 @@ func TarGz(targzPath string, filePaths []string) error {
 
 // tarball writes all files listed in filePaths into tarWriter, which is
 // writing into a file located at dest.
-func tarball(filePaths []string, tarWriter *tar.Writer, dest string) error {
+func tarball(filePaths []string, tarWriter *paxtar.Writer, dest string) error {
 	for _, fpath := range filePaths {
 		err := tarFile(tarWriter, fpath, dest)
 		if err != nil {
@@ -61,7 +63,7 @@ func tarball(filePaths []string, tarWriter *tar.Writer, dest string) error {
 
 // tarFile writes the file at source into tarWriter. It does so
 // recursively for directories.
-func tarFile(tarWriter *tar.Writer, source, dest string) error {
+func tarFile(tarWriter *paxtar.Writer, source, dest string) error {
 	sourceInfo, err := os.Stat(source)
 	if err != nil {
 		return fmt.Errorf("%s: stat: %v", source, err)
@@ -77,7 +79,7 @@ func tarFile(tarWriter *tar.Writer, source, dest string) error {
 			return fmt.Errorf("error walking to %s: %v", path, err)
 		}
 
-		header, err := tar.FileInfoHeader(info, path)
+		header, err := paxtar.FileInfoHeader(info, path)
 		if err != nil {
 			return fmt.Errorf("%s: making header: %v", path, err)
 		}
@@ -104,7 +106,7 @@ func tarFile(tarWriter *tar.Writer, source, dest string) error {
 			return nil
 		}
 
-		if header.Typeflag == tar.TypeReg {
+		if header.Typeflag == paxtar.TypeReg {
 			file, err := os.Open(path)
 			if err != nil {
 				return fmt.Errorf("%s: open: %v", path, err)
